@@ -1,0 +1,17 @@
+<div *ngIf="courseData !== undefined || courseData !== false">
+    <div class="list-group-item course-list" *ngFor="let course of courseData" (click)="selectCourse(course)">
+        <h6 class="details-title">
+            {{schoolCode}}:{{subjectCode}}:{{course.code}}: {{course.fullTitle || course.title}}
+        </h6>
+        <div class="course-info">
+            <p class="credits"><b>Credits:</b> {{course.credits}}</p>
+            <p *ngIf="course.coreCodes.length > 0"><b>Core Codes:</b> 
+                <span *ngFor="let code of course.coreCodes; let i=index">
+                    {{code.code}}<span *ngIf="i!=course.coreCodes.length-1">,</span>
+                </span>
+            </p>
+            <p *ngIf="course.prereqs">Pre-reqs: {{course.prereqs}}</p>
+        </div>
+        <section-details [semesters]="course.semesters" *ngIf="course.selected"></section-details>
+    </div>
+</div>

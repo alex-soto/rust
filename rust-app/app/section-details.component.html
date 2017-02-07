@@ -1,0 +1,32 @@
+<button type="button" class="btn btn-default" *ngFor="let semester of semesters" (click)="OnClick(semester)">Semester: {{semester.name}}</button>
+<table class="table table-condensed table-striped table-semester" *ngFor="let semester of semesters">
+    <tr>
+        <th>Number</th>
+        <th>Index</th>
+        <th>Instructors</th>
+        <th>Class Type</th>
+        <th>Meeting Times</th>
+    </tr>
+    <tr *ngFor="let section of semester.sections">
+        <td>{{section.number}}</td>
+        <td>{{section.index}}</td>
+        <td><p *ngFor="let instructor of section.instructors">{{instructor.name}}</p></td>
+        <td><p *ngFor="let meetTime of section.meetingTimes">
+            <span *ngIf="meetTime.meetingModeDesc">{{meetTime.meetingModeDesc}}</span>
+        </p>
+        </td>
+        <td><p *ngFor="let meetTime of section.meetingTimes">
+            <span *ngIf="meetTime.meetingDay">{{meetTime.meetingDay}}</span>
+            <span *ngIf=meetTime.startTime>
+                {{meetTime.startTime.substring(0,2)}}:{{meetTime.startTime.substring(2)}}     
+            </span>
+            <span *ngIf="meetTime.pmCode">{{meetTime.pmCode == 'A' ? 'AM' : 'PM'}}</span>
+            <span *ngIf="meetTime.endTime">
+                - {{meetTime.endTime.substring(0,2)}}:{{meetTime.endTime.substring(2)}}
+            </span>
+            <span *ngIf="meetTime.campusAbbrev">{{meetTime.campusAbbrev}} </span>
+            <span *ngIf="meetTime.buildingCode">{{meetTime.buildingCode}} </span>
+            <span *ngIf="meetTime.roomNumber">{{meetTime.roomNumber}} </span>
+        </p></td>
+    </tr>
+</table>

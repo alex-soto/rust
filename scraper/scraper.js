@@ -237,7 +237,7 @@ let getCourseData = (subjects, subjNum) => {
     return new Promise((resolve, reject) => {
         let school, subject, courses = null;
         let nodeMemory, percentMemory, percentComplete, progress = null; 
-        subjNum = subjNum ? subjNum : 111;
+        subjNum = subjNum ? subjNum : 0;
         // let queryProgressMarker = (process.stdout.columns / 100);
         // Code to actually get the class data
         let localQs = qs;

@@ -1,23 +1,26 @@
 <!--<p (click)="OnClick()">Angular Test: {{name}}</p>-->
-
-<nav id="school-nav">
-    <ul class="nav nav-pills nav-stacked" *ngIf="schoolData !== undefined || schoolData !== false">
-        <li *ngFor="let school of schoolData">
-            <a href="#{{school.code}}">{{school.description}}</a>
-        </li>
-    </ul>
-</nav>
-<rust-search></rust-search>
-<button (click)="OnClick()">Report Queried Data</button>
-<div id="school-details" class="list-group" data-spy="scroll" data-target="#school-nav" *ngIf="schoolData !== undefined || schoolData !== false">
-    <div class="list-group-item school-list" *ngFor="let school of (schoolData | rustSearch:'schools')" 
-        (click)="selectSchool(school)"> 
-        <!--[@schoolState]=school.selected>-->
-        <h4 id="{{school.code}}" class="details-title">
-            {{school.code}}: {{school.description}}
-        </h4>
-        
-        <subject-details [schoolId]="school._id" [schoolCode]="school.code"
-            *ngIf="school.selected == true"></subject-details>
-    </div>
+<div class="col-md-3">
+    <nav id="school-nav">
+        <ul class="nav nav-pills nav-stacked" *ngIf="schoolData !== undefined || schoolData !== false">
+            <li *ngFor="let school of schoolData">
+                <a href="#{{school.code}}">{{school.description}}</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<div class="col-md-9">
+    <rust-search></rust-search>
+    <button (click)="OnClick()">Report Queried Data</button>
+    <div id="school-details" class="list-group" data-spy="scroll" data-target="#school-nav" *ngIf="schoolData !== undefined || schoolData !== false">
+        <div class="list-group-item school-list" *ngFor="let school of (schoolData | rustSearch:'schools')" 
+            (click)="selectSchool(school)"> 
+            <!--[@schoolState]=school.selected>-->
+            <h4 id="{{school.code}}" class="details-title">
+                {{school.code}}: {{school.description}}
+            </h4>
+            
+            <subject-details [schoolId]="school._id" [schoolCode]="school.code"
+                *ngIf="school.selected == true"></subject-details>
+        </div>
+    </div>  
 </div>

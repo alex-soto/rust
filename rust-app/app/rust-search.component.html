@@ -1,10 +1,36 @@
-<div class="input-group">
-    <input ng2-auto-complete type="text" class="form-control" placeholder="Search for..." 
-            [formControl]="search" [source]="observableSource.bind(this)" [min-chars]="2"
-            [list-formatter]="autocompleListFormatter" value-property-name="id" display-property-name="text">
+<div class="input-group"> 
+    <div class="input-group-btn">
+        <button type="button" class="btn btn-default dropdown-toggle" name="searchType" 
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{selectedSearch.displayText}} <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li *ngFor="let type of searchTypes">
+                <a href="#" (click)="selectedSearch=type" >{{type.displayText}}</a>
+            </li>
+        </ul>
+        
+    </div> <!-- /input-group-btn -->
+    
+    <input type="text" class="form-control" name="search" [formControl]="search" 
+            placeholder="{{selectedSearch.example}}" (keyup.enter)="addSearchCriterion()"> 
     <span class="input-group-btn">
-        <button class="btn btn-default" type="button">Go!</button>
+    <button (click)="addSearchCriterion()" class="btn btn-default" type="button">
+        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add search criteria
+    </button>
+    </span>
+</div> <!-- /input-group -->
+
+<!--<div class="well">-->
+<div>
+    <span *ngFor="let criterion of searchCriteria" class="label label-info">
+            <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+    <b>{{criterion.type}}:</b> {{criterion.value}}
     </span>
 </div>
-<p>{{testVar | json}}</p>
-<!--<p>{{autoCompleteSource | json}}</p>-->
+<!--(valueChanged)="addSearchCriterion()"-->
+<!--<input ng2-auto-complete type="text" class="form-control" placeholder="Search for..." -->
+    <!--        [formControl]="search" [source]="observableSource.bind(this)" [min-chars]="2" -->
+    <!--        value-property-name="id" display-property-name="text"-->
+    <!--        [list-formatter]="autocompleteListFormatter" >-->
+<p>{{search.value | json}}</p>

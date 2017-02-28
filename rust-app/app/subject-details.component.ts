@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { SchoolDataService } from './school-data.service';
+import {Observable} from 'rxjs/Rx';
 import { Subject } from './models/subjects';
 
 @Component({
@@ -11,16 +12,12 @@ export class SubjectDetailsComponent implements OnInit {
     
     @Input() schoolId: string;
     @Input() schoolCode: string;
-    subjectData: Subject[];
+    subjectData: Observable<Subject[]>;
     
     constructor(private schoolDataService: SchoolDataService) {}
     
     getSubjects(): void {
-        this.schoolDataService.getSubjects(this.schoolCode)
-        .then(data => {
-            // console.log(data);
-            this.subjectData = data;
-        });
+        this.subjectData = this.schoolDataService.getSubjects(this.schoolId)
     }
     
     logSubjects(): void {

@@ -1,7 +1,7 @@
 <div *ngIf="courseData !== undefined || courseData !== false">
-    <div class="list-group-item course-list" *ngFor="let course of courseData" (click)="selectCourse(course)">
+    <div class="list-group-item course-list" *ngFor="let course of courseData | async | rustSearch: 'courses'" (click)="selectCourse(course)">
         <h6 class="details-title">
-            {{schoolCode}}:{{subjectCode}}:{{course.code}}: {{course.fullTitle || course.title}}
+            {{schoolCode}}:{{subjectCode}}:{{course.courseNumber}}: {{course.fullTitle || course.title}}
         </h6>
         <div class="course-info">
             <p class="credits"><b>Credits:</b> {{course.credits}}</p>

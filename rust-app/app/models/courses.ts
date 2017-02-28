@@ -1,9 +1,7 @@
-import { CoreCode } from './corecode';
-
 export interface Course {
     "id": String,
     "code": String,
-    "coreCodes": CoreCode[],
+    "coreCodes": any[],
     "courseNumber": String,
     "credits": Number,
     "fullTitle": String,

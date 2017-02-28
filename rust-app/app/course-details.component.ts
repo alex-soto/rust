@@ -1,7 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { SchoolDataService } from './school-data.service';
+// import { RustSearchPipe } from './rust-search.pipe';
 import { Course } from './models/courses';
-// import { CourseCode } from './models/CourseCode';
+import {Observable} from 'rxjs/Rx';
 
 @Component({
     moduleId: module.id,
@@ -11,17 +12,18 @@ import { Course } from './models/courses';
 export class CourseDetailsComponent implements OnInit {
     @Input() schoolId: string;
     @Input() schoolCode: string;
+    @Input() subjectId: string;
     @Input() subjectCode: string;
-    courseData: Course[];
+    courseData: Observable<Course[]>;
     
     constructor(private schoolDataService: SchoolDataService) {}
     
     getCourses(): void {
-        this.schoolDataService.getCourses(this.schoolCode, this.subjectCode)
-        .then(data => {
-            // console.log(data);
-            this.courseData = data;
-        });
+        this.courseData = this.schoolDataService.getCourses(this.schoolCode, this.subjectId)
+        // .then(data => {
+        //     // console.log(data);
+        //     this.courseData = data;
+        // });
     }
     
     selectCourse(course: Course): void {

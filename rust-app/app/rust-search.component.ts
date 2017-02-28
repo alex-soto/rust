@@ -1,22 +1,25 @@
-import { Component, Input } from '@angular/core';
-// import {Observable} from 'rxjs/Observable';
-// import 'rxjs/add/observable/of';
-// import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Component, Input, OnInit } from '@angular/core';
+import {Observable} from 'rxjs/Observable';
 import { FormControl, FormGroup } from '@angular/forms';
 import { SchoolDataService } from './school-data.service';
+import { RustSearchPipe } from './rust-search.pipe';
 
 @Component({
   moduleId: module.id,
   selector: 'rust-search',
-  providers:    [ SchoolDataService ],
   templateUrl: 'rust-search.component.html'
 })
-export class RustSearchComponent { 
+
+export class RustSearchComponent implements OnInit { 
   
-  
+  @Input() searchPipe: RustSearchPipe;
   searchCriteria: any[] = [];
   selectedSearch: any;
-  search: FormControl = new FormControl(); 
+  search: FormControl = new FormControl();
+  
+  //BEGIN TEST//
+  searchParams: any[] = [];
+  //END TEST//
   
   /*
    * Search options: School, Subject, Course, Professor, CoreCode
@@ -35,47 +38,97 @@ export class RustSearchComponent {
     {
       id: "course",
       displayText: "Courses",
-      example: `"421", "data analytics", or instructor's name`
-    },
-    {
-      id: "coreCode",
-      displayText: "Core Codes",
-      example: `"WCd" or "writing and communication"`
+      example: `"421", "data analytics", core code, or instructor name`
     }
+    // ,
+    // {
+    //   id: "coreCode",
+    //   displayText: "Core Codes",
+    //   example: `"WCd" or "writing and communication"`
+    // }
   ];
-
-  @Input() searchParams: string;//= [];
-  
-  
-  testFunction(event: any) {
-    console.log(`testFunction() called`)
-    console.log(event);
-  }
   
   addSearchCriterion(): void {
-    console.log(`addSearchCriterion() called.`);
     if (this.selectedSearch && this.search.value){
-      this.searchCriteria.push({
-        type: this.selectedSearch.displayText,
+      let newCriterion = {
+        id: this.selectedSearch.id,
+        type: this.selectedSearch.displayText.toLowerCase(),
         value: this.search.value
+      }
+      // this.searchCriteria.push(newCriterion);
+      // this.schoolDataService.getSearchData(newCriterion);
+      this.searchCriteria.push(newCriterion);
+      this.schoolDataService.getSearchData(newCriterion).subscribe(data => {
+        // this.searchParams = data;
+        
+        this.searchParams.push({
+          "searchKey": newCriterion,
+          "searchResults": this.getKeysFromData(data)
+          // "searchResults": this.getKeysFromData(data)
+        });
+        this.searchPipe.updateSearchData(this.searchParams);
+        // this.searchPipe.searchDataSubject.next(this.searchParams);
       });
+      
     }
     this.search.setValue('');
+    // this.searchResults = this.schoolDataService.getSearchData(this.searchCriteria);
   }
   
+  deleteSearchCriterion(criterion: any): void {
+    this.searchCriteria.splice(this.searchCriteria.indexOf(criterion), 1);
+    // this.rustSearchPipe.searchDataSubject.next(this.searchCriteria);
+    for (let srch of this.searchParams) {
+      if (srch.searchKey == criterion){
+        this.searchParams.splice(this.searchParams.indexOf(srch), 1);
+      }
+    }
+    
+  }
   
-  constructor(){
+  private getKeysFromData(data: any[]): any[] {
+    let values: any = {
+      "schools": [],
+      "subjects": [],
+      "courses": []
+    };
+    for (let res of data){
+      if (res.subject && res.school){
+        values.schools.push(res.school);
+        values.subjects.push(res.subject);
+        values.courses.push(res._id);
+      } else if (res.school && res.courses) {
+        values.schools.push(res.school);
+        values.subjects.push(res._id);
+      } else {
+        values.schools.push(res._id);
+      }
+    }
+    return values;
+  }
+  
+  // constructor(){
+  constructor(private schoolDataService: SchoolDataService){
     this.selectedSearch = this.searchTypes[0];
     
-    // this.searchForm.valueChanges
-    // .distinctUntilChanged()
-    // .debounceTime(400)
-    // .subscribe(val => {
-    //   this.searchParams = val;
-    //   console.log(`search.valueChanges called.`);
-    // });
   }
-}
+  
+  ngOnInit(){
+    // this.searchPipe.searchDataSubject.subscribe(data=>{
+    //   console.log(`RustSearchPipe.searchDataSubject: SUBSCRIPTION-RUST-SEARCH.COMPONENT`);
+    // })
+  }
+  
+  onClick(){
+    console.log(`this.searchCriteria`);
+    console.log(`${this.searchCriteria}`);
+    console.log(`this.searchParams: `);
+    console.log(this.searchParams);
+  }
+  
+} // class RustSearchComponent
+  
+  
 
 /*
 autoCompleteSource: any[];
@@ -112,11 +165,7 @@ regexArr = [
       }]
     }
   ];
-  
- observableSource(){
-    return Observable.of(this.autoCompleteSource);
-  };
-  
+
   autocompleteListFormatter = (data: any) : SafeHtml => {
     let html = `<span (click)="addSearchCriterion()">Find '<i>${this.searchParams}</i>' in ${data.text}</span>`;
     return this._sanitizer.bypassSecurityTrustHtml(html);

@@ -1,5 +1,5 @@
-<button type="button" class="btn btn-default" *ngFor="let semester of semesters" (click)="OnClick(semester)">Semester: {{semester.name}}</button>
-<table class="table table-condensed table-striped table-semester" *ngFor="let semester of semesters">
+<button type="button" class="btn btn-default" *ngFor="let semester of semesters" [class.btn-primary]="semester == selectedSemester" (click)="selectSemester(semester)">Semester: {{formatSemester(semester)}}</button>
+<table class="table table-condensed table-striped table-bordered table-semester" *ngIf="selectedSemester">
     <tr>
         <th>Number</th>
         <th>Index</th>
@@ -7,10 +7,10 @@
         <th>Class Type</th>
         <th>Meeting Times</th>
     </tr>
-    <tr *ngFor="let section of semester.sections">
+    <tr *ngFor="let section of selectedSemester.sections">
         <td>{{section.number}}</td>
         <td>{{section.index}}</td>
-        <td><p *ngFor="let instructor of section.instructors">{{instructor.name}}</p></td>
+        <td><p *ngFor="let instructor of section.instructors">{{instructor}}</p></td>
         <td><p *ngFor="let meetTime of section.meetingTimes">
             <span *ngIf="meetTime.meetingModeDesc">{{meetTime.meetingModeDesc}}</span>
         </p>

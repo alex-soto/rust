@@ -57,3 +57,8 @@
 section-details {
   display: block;
 }
+
+.search-criteria .label {
+  margin-right: 5px;
+  cursor: pointer;
+}

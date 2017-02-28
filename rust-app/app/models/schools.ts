@@ -3,7 +3,6 @@ export interface School {
   "code": string,
   "description": string,
   "level": string,
-  "numSubjects": number,
   "subjects": any[],
   "selected": boolean
 }

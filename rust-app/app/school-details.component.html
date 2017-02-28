@@ -1,26 +1,46 @@
 <!--<p (click)="OnClick()">Angular Test: {{name}}</p>-->
+
+<!--<div class="col-md-3">-->
+<!--    <div id="search-results">-->
+<!--        <h4>Search Results</h4>-->
+<!--        <p *ngIf="searchResults.length == 0"></p>-->
+<!--        <button (click)="ShowSearchResults()">searchResults</button>-->
+<!--        <ul class="nav nav-pills nav-stacked" *ngIf="searchResults.length > 0">-->
+<!--            <li *ngFor="let result of searchResults">-->
+                <!--<a href="#{{school.code}}">{{school.description}}</a>-->
+<!--                <p>Schools: {{result.searchResults.schools.length}}</p>-->
+<!--                <p *ngIf="result.searchKey.type == 'subjects' || result.searchKey.type == 'courses'">-->
+<!--                    Subjects: {{result.searchResults.subjects.length}}-->
+<!--                </p>-->
+<!--                <p *ngIf="result.searchKey.type == 'courses'">-->
+<!--                    Courses: {{result.searchResults.courses.length}}-->
+<!--                </p>-->
+<!--            </li>-->
+<!--        </ul>-->
+<!--    </div>-->
+<!--</div>-->
 <div class="col-md-3">
     <nav id="school-nav">
         <ul class="nav nav-pills nav-stacked" *ngIf="schoolData !== undefined || schoolData !== false">
-            <li *ngFor="let school of schoolData">
+            <li *ngFor="let school of schoolData | async">
                 <a href="#{{school.code}}">{{school.description}}</a>
             </li>
         </ul>
     </nav>
 </div>
 <div class="col-md-9">
-    <rust-search></rust-search>
+    <rust-search [searchPipe]="rustSearchPipe"></rust-search>
     <button (click)="OnClick()">Report Queried Data</button>
     <div id="school-details" class="list-group" data-spy="scroll" data-target="#school-nav" *ngIf="schoolData !== undefined || schoolData !== false">
-        <div class="list-group-item school-list" *ngFor="let school of (schoolData | rustSearch:'schools')" 
+        <div class="list-group-item school-list" *ngFor="let school of schoolData | async | rustSearch:'schools'" 
             (click)="selectSchool(school)"> 
             <!--[@schoolState]=school.selected>-->
             <h4 id="{{school.code}}" class="details-title">
                 {{school.code}}: {{school.description}}
             </h4>
-            
-            <subject-details [schoolId]="school._id" [schoolCode]="school.code"
-                *ngIf="school.selected == true"></subject-details>
+            <p>Number of subjects: {{school.subjects.length}}</p>
+            <subject-details *ngIf="school.selected == true" [schoolId]="school._id" 
+                [schoolCode]="school.code"></subject-details>
         </div>
     </div>  
 </div>

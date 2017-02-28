@@ -18,14 +18,18 @@
     <button (click)="addSearchCriterion()" class="btn btn-default" type="button">
         <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add search criteria
     </button>
+    <button (click)="onClick()" class="btn btn-default" type="button">
+        Log searchParams
+    </button>
     </span>
 </div> <!-- /input-group -->
 
 <!--<div class="well">-->
-<div>
-    <span *ngFor="let criterion of searchCriteria" class="label label-info">
-            <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
-    <b>{{criterion.type}}:</b> {{criterion.value}}
+<div class="search-criteria">
+    <span *ngFor="let criterion of searchParams" class="label label-info" 
+            (click)="deleteSearchCriterion(criterion.searchKey)">  
+        <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+        <b>{{criterion.searchKey.type}}:</b> {{criterion.searchKey.value}}
     </span>
 </div>
 <!--(valueChanged)="addSearchCriterion()"-->
@@ -33,4 +37,5 @@
     <!--        [formControl]="search" [source]="observableSource.bind(this)" [min-chars]="2" -->
     <!--        value-property-name="id" display-property-name="text"-->
     <!--        [list-formatter]="autocompleteListFormatter" >-->
-<p>{{search.value | json}}</p>
+    
+<!--<p>searchCriteria: {{ searchCriteria | json }}</p>-->

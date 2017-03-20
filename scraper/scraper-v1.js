@@ -6,7 +6,7 @@ const util = require('./utilities');
 // const Promise = require('promise');
 
 let qs = {
-    semester: '12017',
+    semester: '92016',
     campus: 'NB',
     level: 'U',
     subject: null
@@ -19,7 +19,6 @@ let scraperFolder = '../.scraper-data/',
     
 let metaData,
     newCurrentTerm,
-    rutgersData,
     schoolData,
     subjectData = null;
     
@@ -63,8 +62,7 @@ let getSchoolData = () => {
     return new Promise((resolve, reject) => {
         if (fs.existsSync(localSchoolFile)) {
             let schoolFileData = fs.readFileSync(localSchoolFile, 'utf8');
-            rutgersData = JSON.parse(schoolFileData);
-            schoolData = rutgersData.units;
+            schoolData = JSON.parse(schoolFileData);
             resolve();
         } else { 
             ruquery.getSocData('SCHOOLS')
@@ -74,10 +72,8 @@ let getSchoolData = () => {
                     console.log(`Unable to retrieve school data!`);
                     reject();
                 } else {
-                    rutgersData = data;
+                    schoolData = data;
                     fs.writeFileSync(localSchoolFile, JSON.stringify(data),'utf8');
-                    schoolData = rutgersData.units;
-                    subjectData = rutgersData.subjects;
                     resolve();
                 }
             });
@@ -90,7 +86,7 @@ let getSchoolData = () => {
 // then school and course data should be updated
 let compareSchoolAndMetaData = () => {
     return new Promise((resolve, reject) => {
-        newCurrentTerm = rutgersData.currentTermDate;
+        newCurrentTerm = schoolData.currentTermDate;
         if ((metaData.currentTerm.term == null || metaData.currentTerm.year == null) ||
             ( newCurrentTerm.year >= metaData.currentTerm.year && 
                     newCurrentTerm.term >= metaData.currentTerm.term)){
@@ -114,6 +110,47 @@ let compareSchoolAndMetaData = () => {
                     resolve();
                 }
             }
+        }
+    });
+};
+
+// Function updateSchoolData: loop through all the schools in schoolData.units and update as necessary.
+let updateSchoolData = (schools, counter) => {
+    return new Promise((resolve, reject) => {
+        counter = counter ? counter : 0;
+        if (counter == 0){
+            console.log(`Querying school API...`);
+        }
+        let school = schools[counter];
+        if ((school.level.indexOf(qs.level) >= 0) && (school.campus.indexOf(qs.campus) >= 0)){
+            let output = `Updating: ${school.code}-${school.description}`;
+            process.stdout.clearLine();
+            process.stdout.cursorTo(0);
+            process.stdout.write(output);
+            util.findSchoolByCode(school.code)
+            .then(data => {
+                if (data && updateExistingData){
+                    util.updateSchool(data, school);
+                } 
+                else if (!data) {
+                    util.addNewSchool(school);
+                }
+            });
+        }
+        if (counter < schools.length - 1){
+            counter++;
+            // resolve(updateSchoolData(schools, counter));
+            setTimeout(() => {
+                school = null;
+                resolve(updateSchoolData(schools, counter));
+            }, 200);
+            
+        } else {
+            schools = null;
+            process.stdout.clearLine();
+            process.stdout.cursorTo(0);
+            console.log(`Finished updating schools.`);
+            resolve(counter);
         }
     });
 };
@@ -144,7 +181,6 @@ let getSubjectData = (qs) => {
 };
 
 let findItemInData = (code, data) => {
-    // console.log(`findItemInData called: code=${code}, data.length=${data.length}`);
     return new Promise((resolve, reject) => {
         for (let i in data){
             if (code == data[i].code){
@@ -155,45 +191,43 @@ let findItemInData = (code, data) => {
     });
 };
 
-
-
-let processCourseData = (school, subject, course) => {
+let bulkProcessCourseData = (school, subject, course) => {
     return new Promise((resolve, reject) => {
         if (!school || !subject || !course){
             console.log(`Critical error: missing one or more of the following data: school, subject, courses.`);
             reject(null);
         }
         let thisCourse = null;
+        
         util.findCourseByCode(subject, course.courseNumber)
         .then(data => {
-            if (data) {
-                // console.log(`found course by code: ${data.courseNumber}`);
-                thisCourse = data;
-            } else {
-                // console.log(`unable to find course by code. data: ${data}`); 
-                // console.log(`attempting to add new course`);
-                return util.addNewCourse(school, subject, course).then(data => thisCourse = data);
-            }
-        }).then(() => {
-            // console.log(`attempting to find semester in course.`);
-            return util.findSemesterInCourse(thisCourse, qs.semester);
-        }).then(data => {
-            if (data) {
-                // console.log(`semester found for ${course.title}`);
-                resolve(thisCourse);    
-            } else {
-                return util.addSectionsToSemester(thisCourse, qs.semester, course.sections);
-            }
+            // if (courseNum == 0){
+            //     console.log(`line 212. course found in data. data: ${JSON.stringify(data)}`);    
+            // }
+            thisCourse = data;
+            // Promise.resolve(thisCourse);
         }, err => {
-            // console.log(`line 215: err finding semester in course: ${course.title}`);
-            return util.addSectionsToSemester(thisCourse, qs.semester, course.sections);
+            // if (courseNum == 0) console.log(`line 217. course not found. adding...`);
+            return util.addNewCourse(school, subject, course).then(data => thisCourse = data);
+            // return util.addNewCourse(school, subject, course);
         })
         .then(data => {
-            // console.log(`resolving thisCourse. courseNumber: ${thisCourse.courseNumber}`);
+            return util.findSemesterInCourse(thisCourse, qs.semester);
+        }, err => {
+            console.log(`Error finding semester in course: ${err}`);
+        })
+        .then(data => {
+            if (data == null || data.length == 0) {
+                return util.addSectionsToSemester(school, thisCourse, qs.semester, course.sections);
+            }
+        }, err => {
+            return util.addSectionsToSemester(school, thisCourse, qs.semester, course.sections);
+        })
+        .then(() => {
             resolve(thisCourse);
         })
         .catch(err => {
-            console.log(`line 219. error with course: ${course.offeringUnitCode}:${subject.code}:${course.courseNumber} (${course.title}). err: ${err}`);
+            console.log(`line 307. error with course: ${course.offeringUnitCode}:${subject.code}:${course.courseNumber} (${course.title}). err: ${err}`);
             reject(course);
         });
     });
@@ -201,57 +235,38 @@ let processCourseData = (school, subject, course) => {
 
 let getCourseData = (subjects, subjNum) => {
     return new Promise((resolve, reject) => {
-        subjNum = subjNum ? subjNum : 0;
         let school, subject, courses = null;
         let nodeMemory, percentMemory, percentComplete, progress = null; 
+        subjNum = subjNum ? subjNum : 0;
         // let queryProgressMarker = (process.stdout.columns / 100);
         // Code to actually get the class data
         let localQs = qs;
-        // console.log(`subjects[${subjNum}]['code']: ${subjects[subjNum]['code']}`);
         localQs.subject = subjects[subjNum]['code'];
         if (!localQs.subject) {
             reject(`Querying courses failed. Subject was invalid: ${localQs.subject}`);
         }
-        // console.log(`subjNum: ${subjNum}`);
+        
         ruquery.getSocData('COURSES', localQs)
         .then(data => {
-            // console.log(`COURSES DATA: ${data}`);
             courses = data;
             queryResults.subjects.pass.push(localQs.subject);
             return util.findSchoolByCode(courses[0].offeringUnitCode)
             .then(data => {
-                if (data) {
-                    school = data;
-                } else {
-                    // console.log(`util.findSchoolByCode successful but no data!`)
-                    // console.log(`\nSchool not found. Adding new school`);
-                    return findItemInData(courses[0].offeringUnitCode, schoolData)
-                    .then(newSchool => {
-                        // console.log(`findItemInData successful`);
-                        return util.addNewSchool(newSchool).then(data => {
-                            school = data;
-                            // console.log(`New school added. ${school.code}`)
-                        });
-                    });
-                }
-            }).then(() => {
-                return util.findSubjectByCode(courses[0].subject);
-            }).then(data => {
-                if (data) {
-                    // console.log(`line 232: subject found! ${data.code}`);
+                school = data;
+                return util.findSubjectByCode(school, courses[0].subject)
+                .then(data => {
                     subject = data;
-                    // return Promise.resolve(subject);
-                    // return Promise.resolve(data);
-                    // return data;
-                } else {
+                }, err => {
                     return findItemInData(courses[0].subject, subjectData)
-                    .then(newSubject => {
-                        return util.addNewSubject(school, newSubject).then(data => {
-                            subject = data;
-                            // console.log(`New subject added. ${subject.code}`);
-                        });
+                    .then(data => {
+                        // console.log(`line 413. subject found in data.`);
+                        return util.addNewSubject(school, data).then(data => subject = data);
                     });
-                }
+                })
+                // .then(data => {
+                //     console.log(`line 306. data: ${JSON.stringify(data)}`);
+                //     if (data) subject = data;
+                // });
             });
         }, err => {
             queryResults.subjects.fail.push(`${localQs.subject}`);
@@ -270,26 +285,20 @@ let getCourseData = (subjects, subjNum) => {
             process.stdout.write(progress);
             // console.log(`\nline 329. ${school.code}:${subject.code}- ${courses.length} courses`);
             // return processCourseData(school, subject, courses);
-            
-            // let promisifiedCourses = courses.map((course) => {
-            //     return bulkProcessCourseData(school, subject, course);
-            // });
             let promisifiedCourses = courses.map((course) => {
-                return processCourseData(school, subject, course);
+                return bulkProcessCourseData(school, subject, course);
             });
             return Promise.all(promisifiedCourses);
         })
         .then(() => {
-            // console.log(`finished processing courses for ${subjects[subjNum]['code']}`);
             // localQs, school, subject, courses, percentComplete, nodeMemory, percentMemory, progress = null;
-            
             if (subjNum < subjects.length - 1) {
             // TODO: Replace following test condition with the condition above:
             // if (subjNum < 5) {
                 subjNum++;
                 setTimeout(() => {
                     resolve(getCourseData(subjects, subjNum));
-                }, (Math.random() * 1000 + 500)); // End of setTimeout
+                }, (Math.random() * 1000)); // End of setTimeout
                 // resolve(getCourseData(subjects, subjNum));
             } else {
                 console.log("\nFinished querying course API");
@@ -297,8 +306,7 @@ let getCourseData = (subjects, subjNum) => {
             }    
         })
         .catch(err => {
-           console.log(`Error retrieving subject data: ${err}`);
-           console.log(`courses[0]: ${courses[0]}`);
+           console.log(`Error retrieving subject data: ${err}`); 
            if (subjNum < subjects.length - 1){
                subjNum++;
                resolve(getCourseData(subjects, subjNum));
@@ -321,15 +329,18 @@ let getCourseData = (subjects, subjNum) => {
 getSchoolData()
 .then(compareSchoolAndMetaData)
 .then(() => {
+    console.log(`updateExistingData: ${updateExistingData}`);
+    return updateSchoolData(schoolData.units);
+})
+.then(() => {
+    schoolData = null;
+    console.log(`Getting subject data...`);
     return getSubjectData(qs);
-    // console.log(`SCHOOLDATA[0]: ${JSON.stringify(schoolData[0])}`);
-    // console.log(`SUBJECTDATA[0]: ${JSON.stringify(subjectData[0])}`);
 })
 .then(data => {
-    console.log(`updateExistingData: ${updateExistingData}`);
     console.log("Querying course API...");
     // console.log(`Subject length: ${data.length}`);
-    return getCourseData(subjectData);
+    return getCourseData(data);
 }, err => {
     console.log(`Error while querying subjects! ${err}`);
 })
@@ -343,12 +354,12 @@ getSchoolData()
     console.log(`Final query results:`);
     console.log(`====================`);
     console.log(`Subjects: ${queryResults.subjects.pass.length} passed, ${queryResults.subjects.fail.length} failed.`);
-    // fs.unlink(localSchoolFile, () => {
-    //     console.log(`Deleted the local school file.`);
-    // });
-    // fs.unlink(localSubjectFile, () => {
-    //     console.log(`Deleted the local subject file`);
-    // });
+    fs.unlink(localSchoolFile, () => {
+        console.log(`Deleted the local school file.`);
+    });
+    fs.unlink(localSubjectFile, () => {
+        console.log(`Deleted the local subject file`);
+    });
 })
 .then(() => {
     process.exit();
@@ -361,42 +372,6 @@ getSchoolData()
 /********** END TEST **********/
 
 /*
-let bulkProcessCourseData = (school, subject, course) => {
-    return new Promise((resolve, reject) => {
-        if (!school || !subject || !course){
-            console.log(`Critical error: missing one or more of the following data: school, subject, courses.`);
-            reject(null);
-        }
-        let thisCourse = null;
-        
-        util.findCourseByCode(subject, course.courseNumber)
-        .then(data => {
-            thisCourse = data;
-        }, err => {
-            return util.addNewCourse(school, subject, course).then(data => thisCourse = data);
-        })
-        .then(data => {
-            return util.findSemesterInCourse(thisCourse, qs.semester);
-        }, err => {
-            console.log(`Error finding semester in course: ${err}`);
-        })
-        .then(data => {
-            if (data == null || data.length == 0) {
-                return util.addSectionsToSemester(thisCourse, qs.semester, course.sections);
-            }
-        }, err => {
-            return util.addSectionsToSemester(thisCourse, qs.semester, course.sections);
-        })
-        .then(() => {
-            resolve(thisCourse);
-        })
-        .catch(err => {
-            console.log(`line 307. error with course: ${course.offeringUnitCode}:${subject.code}:${course.courseNumber} (${course.title}). err: ${err}`);
-            reject(course);
-        });
-    });
-};
-
 let processCourseData = (school, subject, courses, courseNum) => {
     return new Promise((resolve, reject) => {
         courseNum = courseNum ? courseNum : 0;
@@ -458,47 +433,6 @@ let processCourseData = (school, subject, courses, courseNum) => {
                 resolve(courseNum);
             }
         });
-    });
-};
-
-// Function updateSchoolData: loop through all the schools in schoolData.units and update as necessary.
-let updateSchoolData = (schools, counter) => {
-    return new Promise((resolve, reject) => {
-        counter = counter ? counter : 0;
-        if (counter == 0){
-            console.log(`Querying school API...`);
-        }
-        let school = schools[counter];
-        if ((school.level.indexOf(qs.level) >= 0) && (school.campus.indexOf(qs.campus) >= 0)){
-            let output = `Updating: ${school.code}-${school.description}`;
-            process.stdout.clearLine();
-            process.stdout.cursorTo(0);
-            process.stdout.write(output);
-            util.findSchoolByCode(school.code)
-            .then(data => {
-                if (data && updateExistingData){
-                    util.updateSchool(data, school);
-                } 
-                else if (!data) {
-                    util.addNewSchool(school);
-                }
-            });
-        }
-        if (counter < schools.length - 1){
-            counter++;
-            // resolve(updateSchoolData(schools, counter));
-            setTimeout(() => {
-                school = null;
-                resolve(updateSchoolData(schools, counter));
-            }, 200);
-            
-        } else {
-            schools = null;
-            process.stdout.clearLine();
-            process.stdout.cursorTo(0);
-            console.log(`Finished updating schools.`);
-            resolve(counter);
-        }
     });
 };
 */

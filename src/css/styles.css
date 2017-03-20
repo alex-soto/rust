@@ -1,0 +1,215 @@
+/* Background pattern from Subtle Patterns */
+/*h1 {
+light cornflower blue: #96CBF7
+air superiority blue: #7399B8
+anti-flash white: #E9F2EF
+manatee: #98A5AA
+nickel: #6A7372
+} */
+
+@keyframes nav-switch {
+  0% { top: 0; background-color: rgba(244, 244, 249, 1); }
+  100% { top: -150px; background-color: rgba(244, 244, 249, 0.9); }
+}
+
+@keyframes slide-up {
+  0% { top: 0px ;}
+  100% { top: -150px ;}
+}
+
+body {
+  background-color: #F4F4F9;
+  /*font-family: 'Source Code Pro', monospace;*/
+  /*font-family: 'Inconsolata', monospace;*/
+  font-family: 'Open Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Lato', sans-serif;
+}
+
+#header .site-header {
+  /*margin: 0;*/
+  /*padding: 5px 0;*/
+  color: #DCDCDD;
+}
+
+/*#header img {*/
+/*  float: left;*/
+/*}*/
+
+/*#header img {*/
+/*  display: block;*/
+/*  margin: 0 auto;*/
+/*}*/
+
+nav.navbar-custom {
+  background-color: #F4F4F9;
+  border: 0;
+  /*height: 200px;*/
+  font-size: 1.3em;
+  margin-bottom: 0px;
+  box-shadow: 0px 1px 3px -1px #586F7C;
+}
+
+/*nav.navbar-custom .row {*/
+/*  margin-top: 150px;*/
+/*}*/
+
+.scrolled #header {
+  display: none;
+}
+
+/*nav.navbar-custom.scrolled {*/
+/*.scrolled {*/
+/*  background-color: rgba(244, 244, 249, 0.9);*/
+/*  top: -150px;*/
+  /*height: 50px;*/
+/*  animation-name: nav-switch;*/
+/*  animation-duration: 500ms;*/
+/*  animation-timing-function: ease-in;*/
+/*}*/
+
+/*.unscrolled {*/
+/*  background-color: rgba(244, 244, 249, 1);*/
+/*  top: 0;*/
+/*  animation-name: nav-switch;*/
+/*  animation-duration: 500ms;*/
+/*  animation-timing-function: ease-out;*/
+/*  animation-direction: reverse;*/
+/*}*/
+
+/*nav.navbar-custom.scrolled .row {*/
+/*  margin-top: 0;*/
+/*}*/
+
+/*nav.navbar-custom.scrolled #header {*/
+/*  top: -150px;*/
+/*  animation-name: slide-up;*/
+/*  animation-duration: 500ms;*/
+/*}*/
+
+/*element {*/
+/*    -webkit-transition: all 2s; // Chrome*/
+/*    -moz-transition: all 2s; // Mozilla*/
+/*    -o-transition: all 2s; // Opera*/
+/*    transition: all 2s;*/
+/*}*/
+
+@media (max-width: 767px) {
+  #navbar button.navbar-toggle {
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+  
+  .navbar-nav {
+    margin: 0;
+  }
+}
+
+#header img {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.site-header {
+  text-align: center;
+}
+
+#navbar-collapse>.navbar-nav>li {
+    float: none;
+}
+
+nav.navbar-custom a {
+  color: #2F4550;
+}
+
+nav.navbar-custom a:hover, 
+nav.navbar-custom a:active {
+  -webkit-box-shadow: 0px 1px 2px -1px #586F7C;
+  -moz-box-shadow: 0px 1px 2px -1px #586F7C;
+  box-shadow: 0px 1px 2px -1px #586F7C;
+  background-color: #B8DBD9;
+  color: #000000;
+  -webkit-transition: background-color 0.5s, color 0.5s; /* Safari */
+  transition: background-color 0.5s, color 0.5s;
+}
+
+.fa-icon .fa {
+  font-size: 31px;
+  padding: 9px;
+}
+
+nav.navbar-custom ul.dropdown-menu a {
+  color: #46494C;
+}
+
+#github-link, #linkedin-link {
+  padding: 0 15px;
+}
+
+.fluid-container {
+  margin-top: 20px;
+}
+
+#school-nav {
+  float: left;
+  width: 20%;
+  min-width: 170px;
+}
+
+#school-details {
+  position: relative;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+.school-list {
+  background-color: #ECEFF1;
+}
+
+.details-title {
+  color: #263238;
+  font-weight: bold;
+}
+
+.details-title h6 {
+  font-size: 13px;
+}
+
+.subject-list {
+  background-color: #CFD8DC;
+}
+
+.course-list {
+  background-color: #B0BEC5;
+}
+
+.course-info {
+  display: inline-block;
+}
+
+.course-info p {
+  float: left;
+  margin-right: 10px;
+}
+
+.table-semester {
+  background-color: #ECEFF1;
+}
+
+.table-semester, .table-semester th {
+  text-align: center;
+}
+
+section-details {
+  display: block;
+}
+
+.search-criteria .label {
+  margin-right: 5px;
+  cursor: pointer;
+}

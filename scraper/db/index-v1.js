@@ -25,26 +25,25 @@ process.on('SIGINT', () => {
   }); 
 }); 
 
-// const sectionSchema = new Mongoose.Schema({
-//   number: {
-//     type: String,
-//     unique: true,
-//     sparse: true
-//   },
-//   index: {
-//     type: String,
-//     unique: true,
-//     sparse: true
-//   },
-//   instructors: [{ type: String }],
-//   meetingTimes: []
-// });
+const sectionSchema = new Mongoose.Schema({
+  number: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  index: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  instructors: [],
+  meetingTimes: []
+});
 
 const courseSchema = new Mongoose.Schema({
-  school: { type: String, ref: 'School' },
-  subject: { type: String, ref: 'Subject' },
   courseNumber: {
     type: String,
+    unique: true,
     sparse: true
   },
   title: {
@@ -75,30 +74,14 @@ const courseSchema = new Mongoose.Schema({
   semesters: [{
     name: {
       type: String,
+      unique: true,
       sparse: true
     },
-    sections: [{
-      number: {
-        type: String,
-        unique: true,
-        sparse: true
-      },
-      index: {
-        type: String,
-        unique: true,
-        sparse: true
-      },
-      instructors: [{ 
-        type: String, 
-        trim: true
-      }],
-      meetingTimes: []
-    }]
+    sections: [sectionSchema]
   }]
 });
 
 const subjectSchema = new Mongoose.Schema({
-  school: { type: String, ref: 'School' },
   code: {
     type: String,
     unique: true,
@@ -108,7 +91,7 @@ const subjectSchema = new Mongoose.Schema({
     type: String,
     trim: true
   },
-  courses: [{ type: String, ref: 'Course' }]
+  courses: [courseSchema]
 });
 
 const schoolSchema = new Mongoose.Schema({
@@ -116,25 +99,12 @@ const schoolSchema = new Mongoose.Schema({
   level: String,
   campus: String,
   description: String,
-  subjects: [{ type: String, ref: 'Subject' }]
+  subjects: [subjectSchema]
 });
 
-schoolSchema.index({'$**':'text'});
-subjectSchema.index({'$**':'text'});
-courseSchema.index({'$**':'text'});
-// sectionSchema.index({'$**':'text'});
-// courseSchema.index({courseNumber: 'text', coreCodes: 'text', title: 'text', prereqs: 'text',
-//     'semesters.sections.number':'text','semesters.sections.index':'text','semesters.sections.instructors':'text'
-// });
-
-let schoolModel = Mongoose.model('School', schoolSchema),
-    subjectModel = Mongoose.model('Subject', subjectSchema),
-    courseModel = Mongoose.model('Course', courseSchema);
-    // sectionModel = Mongoose.model('Section', sectionSchema);
+let schoolModel = Mongoose.model('School', schoolSchema);
 
 module.exports = {
     Mongoose,
-    schoolModel,
-    subjectModel,
-    courseModel
+    schoolModel
 };

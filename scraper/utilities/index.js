@@ -4,21 +4,11 @@ const db = require('../db');
 let getAllSchools = () => {
     return new Promise((resolve, reject) => {
         db.schoolModel.find({
-            $and: [{
                 'subjects': {
-        
                     $not: {
                         $size: 0
                     }
-                }},
-                {
-                    'courses': {
-                        $not: {
-                            $size: 0
-                        }
-                    }
-                }
-            ]
+                },
         }, (err, school) => {
             if (err) {
                 reject(err);
@@ -50,6 +40,7 @@ let addNewSchool = school => {
             description: school.description,
             subjects: []
         });
+        
         newSchool.save((err, doc) => {
             if (err){
                 // console.log(`save error: ${err}`);
@@ -78,29 +69,27 @@ let updateSchool = (existingSchool, newSchool) => {
     
 }
 
-let findSubjectByCode = (school, code) => {
+let findSubjectByCode = (code) => {
     return new Promise((resolve, reject) => {
-        // console.log(`findSubjectByCode: school=${school}`);
-        if (school.subjects.length == 0) reject(null);
-        let subject = school.subjects.filter(subj => subj.code == code);
-        if (subject.length > 0) {
-            resolve(subject[0]);
-        } else {
-            reject(null);
-        }
-        
+        db.subjectModel.findOne({ 'code':code }, (err, subject) => {
+            if (err){
+                reject(err);
+            } else {
+                resolve(subject);
+            }
+        });
     });
 };
 
-let updateSubjectData = (school, existingSubject, newSubject) => {
+let updateSubjectData = (existingSubject, newSubject) => {
     return new Promise((resolve, reject) => {
         existingSubject.code = newSubject.code;
         existingSubject.description = newSubject.description;
-        school.save((err, doc) => {
+        existingSubject.save((err, doc) => {
             if (err) {
                 reject(err);
             } else {
-                resolve(existingSubject);
+                resolve(doc);
             }
         }); 
     });
@@ -108,71 +97,66 @@ let updateSubjectData = (school, existingSubject, newSubject) => {
 
 let addNewSubject = (school, subject) => {
     return new Promise((resolve, reject) => {
-        let newSubject = {
+        
+        let createdSubject;
+        let newSubject = new db.subjectModel({
+            school: school._id,
             code: subject.code,
             description: subject.description,
             courses: []
-        };
+        });
         
-        school.subjects.push(newSubject);
-        // db.schoolModel.update(
-        //     { _id: school._id },
-        //     { $addToSet: { subjects: newSubject } },
-        //     callback
-        // ).then((err, doc) => {
-        //     if (err) reject(err);
-        //     resolve(findSubjectByCode(school, subject.code))
-        // });
-        school.save((error, doc) => {
-            // console.log(`addNewSubject. err: ${error}, doc: ${doc}`);
-            if (error) reject(error);
-            findSubjectByCode(school, subject.code).then(data => resolve(data));
+        newSubject.save((error, doc) => {
+            if (error) {
+                // console.log(`error saving newSubject: ${error}`);
+                reject(error);
+            }
+            createdSubject = doc;
+            school.subjects.push(doc._id);
+            // console.log(`pushed subjects to school`);
+            school.save((e, d) => {
+                // console.log(`saved school`);
+                resolve(createdSubject);
+            });
         });
     });
 };
 
 let findCourseByCode = (subject, code) => {
-    // console.log(`findCourseByCode: SUBJECT.COURSES.LENGTH: ${subject.courses.length}, CODE: ${code}`);
     return new Promise((resolve, reject) => {
-        if (!subject.courses || subject.courses.length == 0) {
-            reject(null);
-        } else {
-            for (let course of subject.courses){
-                if (course.courseNumber == code){
-                    resolve(course);
-                } 
-                // else if (i == subject.courses.length-1 && subject.courses[i].courseNumber != code){
-                //     // console.log(`findCourseByCode: code not found. i: ${i}, subject.courses.length: ${subject.courses.length}`)
-                //     reject(null);    
-                // }
+        db.courseModel.findOne({
+            'courseNumber': code,
+            'subject': subject._id
+        }, (error, course) => {
+            if (error) {
+                // console.log(`error finding course by code: ${error}`);
+                reject(error);
             }
-            reject(null);
-        }
+            resolve(course);
+        });
     });
 };
 
-let updateCourseData = (school, course, newCourse) => {
+let updateCourseData = (existingCourse, newCourse) => {
     return new Promise((resolve, reject) => {
-        course.courseNumber = newCourse.courseNumber;
-        course.title = newCourse.title;
-        course.Credits = newCourse.credits;
-        course.prereqs = newCourse.preReqNotes;
-        course.fullTitle = newCourse.expandedTitle;
-        course.synopsis = newCourse.synopsisUrl;
-        course.coreCodes = null;
+        existingCourse.courseNumber = newCourse.courseNumber;
+        existingCourse.title = newCourse.title;
+        existingCourse.Credits = newCourse.credits;
+        existingCourse.prereqs = newCourse.preReqNotes;
+        existingCourse.fullTitle = newCourse.expandedTitle;
+        existingCourse.synopsis = newCourse.synopsisUrl;
+        existingCourse.coreCodes = null;
         if (newCourse.coreCodes){
             newCourse.coreCodes.forEach(cc => {
-                    course.coreCodes.push({
+                    existingCourse.coreCodes.push({
                         id: cc.coreCodeReferenceId,
                         code: cc.code,
                     });
             });
         }
-        school.save((err, doc) => {
-            if (err) {
-                reject(err);
-            }
-            resolve(course);
+        existingCourse.save((error, doc) => {
+            if (error) reject(error);
+            resolve(existingCourse);
         });
     });
 };
@@ -180,15 +164,20 @@ let updateCourseData = (school, course, newCourse) => {
 let addNewCourse = (school, subject, course) => {
     // console.log(`addNewCourse: ${school.code}:${subject.code}:${course.courseNumber}: ${course.title}`);
     return new Promise((resolve, reject) => {
-        let newCourse = {
+        // let createdCourse;
+        let newCourse = new db.courseModel({
+            school: school._id,
+            subject: subject._id,
             courseNumber: course.courseNumber,
             title: course.title,
             credits: course.credits,
+            coreCodes: null,
             prereqs: course.preReqNotes,
             fullTitle: course.expandedTitle,
             synopsis: course.synopsisUrl,
             semesters: []
-        };
+        });
+        
         if (course.coreCodes){
             newCourse.coreCodes = [];
             for (let cc of course.coreCodes){
@@ -197,90 +186,70 @@ let addNewCourse = (school, subject, course) => {
                         code: cc.code,
                     });
             }
-            // course.coreCodes.forEach(cc => {
-                    
-            // });
         }
-        subject.courses.push(newCourse);
-        // console.log(`subject.courses: ${JSON.stringify(subject.courses)}`);
-        school.save((error, doc) => {
+        newCourse.save((error, doc) => {
             if (error) {
-                console.log(`error saving new course: ${error}`);
+                // console.log(`error saving new course: school: ${school.code}, subject: ${subject.code}, courseNumber: ${course.courseNumber}`);
+                // console.log(`error: ${error}`);
                 reject(error);
             }
-            findCourseByCode(subject, course.courseNumber).then(data => resolve(data));
-            // resolve(newCourse);
+            subject.courses.push(doc._id);
+            subject.save((e, d) => {
+                // console.log(`newCourse and subject saved!`);
+                resolve(doc);
+            });
         });
     });
 };
 
 let findSemesterInCourse = (course, semester) => {
-    // console.log(`findSemesterInCourse: COURSE TITLE: ${course.title}, SEMESTER: ${semester}`);
     return new Promise((resolve, reject) => {
-        // if (!course.semesters || course.semesters.length == 0) {
-        if (!course.semesters){
-            // console.log(`!course.semesters: ${course.semesters}`);
-        }
-        if (course.semesters.length == 0) {
-            // console.log(`findSemesterInCourse: semester not found. COURSE.TITLE: ${course.title}, SEMESTER: ${semester}`);
-            // console.log(`course.semesters.length == 0. COURSE: ${course}`);
+        // console.log(`course.semesters: ${course.semesters}`);
+        if (!course.semesters || course.semesters.length == 0){
             reject(null);
-        } else {
-            for (let i in course.semesters){
-                if (course.semesters[i].name == semester) {
-                    // console.log(`findSemesterInCourse. semester found`);
-                    resolve(course.semesters[i]);
-                } else if (i == course.semesters.length-1 && 
-                           course.semesters[i].name != semester){
-                    // console.log(`findSemesterInCourse: semester not found2. COURSE.TITLE: ${course.title}, SEMESTER: ${semester}`);
-                    reject(null);
-                }
-            }
         }
-        
+        for (let i in course.semesters){
+            if (course.semesters[i].name == semester) {
+                // console.log(`found semester in course! ${course.semesters[i].name}`);
+                resolve(course.semesters[i].name);
+            } 
+            // else if (i == course.semesters.length && course.semesters[i].name != semester) {
+            //     console.log(`semester not found! rejecting`);
+            //     reject(null);        
+            // }
+        }
+        reject(null);
     });
 };
 
-let addSectionsToSemester = (school, course, semester, sectionData) => {
+let addSectionsToSemester = (course, semester, sectionData) => {
     // console.log(`${JSON.stringify(course)}`);
     // console.log(`addSectionsToSemester: ${school.code}:${course.subject}:${course.courseNumber}: ${course.title}|${semester}|${sectionData.length}`);
     return new Promise((resolve, reject) => {
-        if (!sectionData || sectionData.length == 0) {
-            reject(null);
-        } else {
-            let newSections = [];
-            for (let i in sectionData) {
-                newSections.push({
-                    number: sectionData[i].number,
-                    index: sectionData[i].index,
-                    instructors: sectionData[i].instructors,
-                    meetingTimes: sectionData[i].meetingTimes
-                });
-                
-                if (i == sectionData.length-1) {
-                    let newSemesterData = {
-                        name: semester,
-                        sections: newSections
-                    };
-                    course.semesters.push(newSemesterData);
-                    school.save((error, doc) => {
-                        if (error) {
-                            console.log(`addNewSemester err: ${error}`);
-                            reject(error);
-                        } else {
-                            // console.log(`addNewSemester success!`);
-                            resolve(newSemesterData);
-                        }
-                    });  
-                }
-            }
+        let newSections = [];
+        for (let i in sectionData) {
+            newSections.push({
+                'number': sectionData[i].number,
+                'index': sectionData[i].index,
+                'instructors': sectionData[i].instructors.map(instr => instr.name),
+                'meetingTimes': sectionData[i].meetingTimes
+            });
         }
         
-        // if (i >= sectionData.length && newSections.length > 0){
-                  
-        //     } else if (i >= sectionData.length && !newSections){
-        //         reject(sectionData);
-        //     }
+        let newSemester = {
+            'name': semester,
+            'sections': newSections
+        };
+        
+        course.semesters.push(newSemester);
+        course.save((error, doc) => {
+            if (error) {
+                console.log(`error adding new semester to ${course.title}: ${JSON.stringify(error)}`);
+                reject(error);
+            }
+            // console.log(`new semester added to ${course.title}!`);
+            resolve(doc);
+        });
     });
 };
 

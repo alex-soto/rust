@@ -3,216 +3,109 @@ const fs = require('fs');
 const db = require('./db');
 const util = require('./utilities');
 
-/*
-util.getAllSchools()
-.then(data => {
-    for (let school of data){
-        console.log(`${school.code}: ${school.description}`);
-    }
-})
-.then(() => process.exit(0));
-*/
-
-let findSchoolsWithSubjects = () => {
+let findCourseWithSubject = () => {
     return new Promise((resolve, reject) => {
-        db.schoolModel.find({
-            "subjects": {
-                $not: {
-                    $size: 0
-                }
-            }
-        }, (err, schools) => {
+        db.courseModel.findOne({
+            'courseNumber': '301'
+            })
+            .populate('school subject')
+            .exec((err, course) => {
             if (err) {
                 reject(err);
-            }
-            else {
-                resolve(schools);
+            } else {
+                console.log(course);
+                resolve(course);
             }
         });
+    })
+};
+
+let findMultipleInstructors = () => {
+    return new Promise((resolve, reject) => {
+       db.courseModel.find({
+             'semesters.sections.instructors': { $size: 2 }
+        }, (err, docs) => {
+           if (err) {
+               reject(err);
+           }
+           resolve(docs);
+        }); 
     });
 };
 
-let findSchoolsWithCourses = () => {
+let findItemById = (model, id) => {
     return new Promise((resolve, reject) => {
-        db.schoolModel.aggregate([{
-            $match: {
-                "subjects": {
-                    $not: {
-                        $size: 0
-                    }
-                }
-            }
-        }, {
-            $unwind: "$subjects"
-        }, {
-        $match: {
-            "subjects.courses": {
-                $not: {
-                    $size: 0
-                }
-            }
-        }},
-        {
-            $unwind: "$subjects.courses"
-        }, 
-        // {
-        //     $match: {
-        //         "subjects.courses.semesters": {
-        //             $not: {
-        //                 $size: 0
-        //             }
-        //         }
-        //     }
-        // }, 
-        {
-            $group: {
-                "_id": {
-                    "school": "$code",
-                    "subject": "$subjects.code",
-                    "course": "$subjects.courses.courseNumber",
-                    "courseTitle": "$subjects.courses.title"
-                }
-                ,
-                "semesters": {$sum: "$subjects.courses.semesters"}
-            }
-        }], (err, schools) => {
+        // console.log(`${model.modelName}`);
+        model.findOne({
+            _id: id
+        }, (err, doc) => {
             if (err) {
                 reject(err);
             }
-            else {
-                resolve(schools);
-            }
+            resolve(doc);
         });
     });
+  
 };
 
-let findSchoolsWithSemesters = () => {
+let performSearch = (query) => {
     return new Promise((resolve, reject) => {
-        db.schoolModel.aggregate([{
-            $match: {
-                "subjects": {
-                    $not: {
-                        $size: 0
-                    }
-                }
-            }
-        }, {
-            $unwind: "$subjects"
-        }, {
-            $unwind: "$subjects.courses"
-        }, {
-            $match: {
-                "subjects.courses": {
-                    $not: {
-                        $size: 0
-                    }
-                },
-                "subjects.courses.semesters": {
-                    $not: {
-                        $size: 0
-                    }
-                }
-            }
-        }, {
-            $project: {
-                "_id": 0,
-                "school": "$code",
-                "subject": "$subjects.code",
-                "course": "$subjects.courses.courseNumber",
-                "name": "$subjects.courses.title",
-                "semesterCount": {
-                    $size: "$subjects.courses.semesters"
-                }
-            }
-        }], (err, schools) => {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(schools);
-            }
-        });
-    });
-};
-
-findSchoolsWithSubjects()
-.then(data => {
-    // console.log(`SCHOOLS WITH SUBJECTS:`);
-    // for (let item of data) {
-    //     console.log(`${item.code}-${item.description}: ${item.subjects.length} subjects`);
-    //     for (let sub of item.subjects) {
-    //         console.log(`\t${item.code}:${sub.code}:${sub.description}`);
-    //     }
-    // }
-    // console.log(data[0]);
-    console.log(`Schools with subjects: ${data.length}`);
-    return findSchoolsWithCourses();
-})
-.then(data => {
-
-    console.log(`Schools with courses: ${data.length}`);
-    console.log(JSON.stringify(data[0]));
-    return findSchoolsWithSemesters();
-})
-.then(data=>{
-    for (let item of data){
-        // console.log(`${item.school}:${item.subject}:${item.course}: ${item.semesterCount} semesters`);
-        if (item.semesterCount == 0 || item.semesterCount > 3){
-            console.log(`${item.school}:${item.subject}:${item.course}: ${item.semesterCount} semesters`);
+        let searchKey = Object.keys(query)[0];
+        let searchValue = query[searchKey];
+        let searchModel, modelKeys;
+        let dbQuery = [];
+        switch(searchKey){
+            case "school":
+                searchModel = db.schoolModel;
+                break;
+            case "subject":
+                searchModel = db.subjectModel;
+                break;
+            case "course":
+                searchModel = db.courseModel;
+                break;
+            default:
+                searchModel = db.courseModel;
+            
         }
-    }
-    console.log(`Schools with semesters: ${data.length}`);
+        if (searchModel){
+            // modelKeys = Object.keys(searchModel.schema.obj);
+            // for (let key of modelKeys){
+            //     dbQuery.push({[key]: searchValue});
+            // }
+            
+            console.log(searchModel.modelName);
+            
+            searchModel.find({
+                $text: { $search: searchValue }
+            }, (err, docs) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(docs);
+            });
+
+        } else {
+            reject(query);
+        }
+        
+    });
+};
+
+// let testQuery = {"school": "arts and"};
+// let testQuery = {"subject": "information"};
+let testQuery = {"course": "sarath"};
+
+// findMultipleInstructors()
+performSearch(testQuery)
+.then(data => {
     console.log(JSON.stringify(data[0]));
-})
-.then(() => process.exit(0))
-.catch(err => {
-    console.log(`Error finding school: ${err}`);
-    process.exit(0);
-});
-
-// util.findSchoolByCode('01')
-// .then(doc => {
-//     return util.findSubjectByCode(doc, '074');
-// })
-// .then(data => {
-//     console.log(data);
-// })
-// .then(() => process.exit());
-/*
-
-findSchoolsWithSubjects()
-.then(data => {
-    for (let item of data) {
-        console.log(`${item.code}-${item.description}: ${item.subjects.length} subjects`);
-    }
-    // console.log(data[0]);
-    console.log(`Count: ${data.length}`);
-}).then(() => process.exit(0))
-.catch(err => {
-    console.log(`Error finding school: ${err}`);
-    process.exit(0);
-});
-
-let testPromise = util.findSchoolByCode('11')
-.then(doc => util.findSubjectByCode(doc, '035'))
-.then(subject => {
-    return util.findCourseByCode(subject, '200');
-})
-.then((course, err) => {
-    return util.findSemesterInCourse(course, '12017');    
-})
-.then(data => {
-    console.log(data);
+    console.log(`data.length: ${data.length}`);
 }, err => {
-    console.log(`err on line 27: ${err}`);
+    console.log(`Error with search! ${JSON.stringify(err)}`);
 })
-.catch(err => {
-    console.log(`err: ${err}`);
+.then(()=>{
     process.exit(0);
 });
 
-Promise.all([testPromise]).then(() => {
-    console.log(`exiting process on line 35`);
-    process.exit(0);
-});
-*/
+// findCourseWithSubject();

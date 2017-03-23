@@ -11,6 +11,7 @@ app.use(express.static(__dirname));
 
 app.use('/api', require('../api'));
 app.get('/', (req, res) => {
+    console.log(`req: ${req}`);
     res.render('index.html');
 });
 

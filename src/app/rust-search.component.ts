@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import { FormControl, FormGroup } from '@angular/forms';
 import { SchoolDataService } from './school-data.service';
@@ -7,19 +7,17 @@ import { RustSearchPipe } from './rust-search.pipe';
 @Component({
   moduleId: module.id,
   selector: 'rust-search',
-  templateUrl: 'rust-search.component.html'
+  templateUrl: 'rust-search.component.html',
+  styleUrls: ['../css/search.css']
 })
 
-export class RustSearchComponent implements OnInit { 
+export class RustSearchComponent { 
   
   @Input() searchPipe: RustSearchPipe;
   searchCriteria: any[] = [];
   selectedSearch: any;
   search: FormControl = new FormControl();
-  
-  //BEGIN TEST//
   searchParams: any[] = [];
-  //END TEST//
   
   /*
    * Search options: School, Subject, Course, Professor, CoreCode
@@ -40,12 +38,6 @@ export class RustSearchComponent implements OnInit {
       displayText: "Courses",
       example: `"421", "data analytics", core code, or instructor name`
     }
-    // ,
-    // {
-    //   id: "coreCode",
-    //   displayText: "Core Codes",
-    //   example: `"WCd" or "writing and communication"`
-    // }
   ];
   
   addSearchCriterion(): void {
@@ -55,29 +47,21 @@ export class RustSearchComponent implements OnInit {
         type: this.selectedSearch.displayText.toLowerCase(),
         value: this.search.value
       }
-      // this.searchCriteria.push(newCriterion);
-      // this.schoolDataService.getSearchData(newCriterion);
       this.searchCriteria.push(newCriterion);
       this.schoolDataService.getSearchData(newCriterion).subscribe(data => {
-        // this.searchParams = data;
         
         this.searchParams.push({
           "searchKey": newCriterion,
           "searchResults": this.getKeysFromData(data)
-          // "searchResults": this.getKeysFromData(data)
         });
         this.searchPipe.updateSearchData(this.searchParams);
-        // this.searchPipe.searchDataSubject.next(this.searchParams);
       });
-      
     }
     this.search.setValue('');
-    // this.searchResults = this.schoolDataService.getSearchData(this.searchCriteria);
   }
   
   deleteSearchCriterion(criterion: any): void {
     this.searchCriteria.splice(this.searchCriteria.indexOf(criterion), 1);
-    // this.rustSearchPipe.searchDataSubject.next(this.searchCriteria);
     for (let srch of this.searchParams) {
       if (srch.searchKey == criterion){
         this.searchParams.splice(this.searchParams.indexOf(srch), 1);
@@ -112,14 +96,8 @@ export class RustSearchComponent implements OnInit {
     this.selectedSearch = this.searchTypes[0];
     
   }
-  
-  ngOnInit(){
-    // this.searchPipe.searchDataSubject.subscribe(data=>{
-    //   console.log(`RustSearchPipe.searchDataSubject: SUBSCRIPTION-RUST-SEARCH.COMPONENT`);
-    // })
-  }
-  
-  onClick(){
+
+  OnClick(){
     console.log(`this.searchCriteria`);
     console.log(`${this.searchCriteria}`);
     console.log(`this.searchParams: `);
@@ -127,61 +105,3 @@ export class RustSearchComponent implements OnInit {
   }
   
 } // class RustSearchComponent
-  
-  
-
-/*
-autoCompleteSource: any[];
-
-regexArr = [
-    {
-      "regex": /[0-9]{2}/g, 
-      "options":[{
-        id:"schools",
-        text:"school codes"
-        }]
-    },
-    {
-      "regex": /[0-9]{3}/g, 
-      "options":[{
-        id:"subjects", 
-        text:"subject codes"
-        },{
-        id:"courseNum",
-        text:"course codes"
-        }]
-    },
-    {
-      "regex": /([a-z]|\s)+/ig, 
-      "options":[{
-        id:"courseTitle",
-        text:"course titles"
-      }, {
-        id:"instructors",
-        text:"instructors"
-      },{
-        id:"coreCodes",
-        text:"core codes"
-      }]
-    }
-  ];
-
-  autocompleteListFormatter = (data: any) : SafeHtml => {
-    let html = `<span (click)="addSearchCriterion()">Find '<i>${this.searchParams}</i>' in ${data.text}</span>`;
-    return this._sanitizer.bypassSecurityTrustHtml(html);
-  }
-  
-    findRegexMessages(input: string) {
-    // let messages: string[] = [];
-    this.autoCompleteSource = [];
-    for (let i in this.regexArr){
-      if (this.regexArr[i]["regex"].test(input)){
-        for (let j in this.regexArr[i]["options"]){
-          this.autoCompleteSource.push(this.regexArr[i]["options"][j]);
-        }
-        
-      }
-    }
-  }
-  
-*/

@@ -37,6 +37,11 @@
       rxjs: {
         defaultExtension: 'js'
       },
+      "rust": { defaultExtension: 'js' },
+      // rust: {
+      //   main: './app/rust-app/rust.module.js',
+      //   defaultExtension: 'js'
+      // },
       'ng2-auto-complete': { 
         main: 'ng2-auto-complete.umd.js', 
         defaultExtension: 'js' 

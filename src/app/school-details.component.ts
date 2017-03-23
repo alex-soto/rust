@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, ChangeDetectorRef, ApplicationRef, trigger, state, style, transition, animate } from '@angular/core';
+import { Component, Input, OnInit, trigger, state, style, transition, animate } from '@angular/core';
 import { SchoolDataService } from './school-data.service';
 import { School } from './models/schools';
 import { RustSearchPipe } from './rust-search.pipe';
@@ -36,13 +36,10 @@ import {Observable} from 'rxjs/Rx';
 //         ])
 //     ]
 
-export class SchoolDetailsComponent implements OnInit, OnChanges {
-    name: String = 'Angular';
+export class SchoolDetailsComponent implements OnInit {
     schoolData: Observable<School[]>;
     searchResults: any[];
-    
-    /*private schoolData: string;*/
-    //#B3E5FC
+
     constructor(private schoolDataService: SchoolDataService,
                 private rustSearchPipe: RustSearchPipe) {}
 
@@ -65,15 +62,19 @@ export class SchoolDetailsComponent implements OnInit, OnChanges {
         
     }
     
-    ngOnChanges(changes: any): void {
-        console.log(`${RustSearchPipe}`);
-    }
-    
     OnClick(): void {
+        console.log(`searchResults:`);
+        console.log(this.searchResults);
+        console.log(`reportQueriedData:`);
         this.schoolDataService.reportQueriedData();
     }
     
     ShowSearchResults(){
         console.log(this.searchResults);
+    }
+    
+    OnSearchUpdate(searchData: any): void {
+        console.log(`OnSearchUpdate called. searchData:`);
+        console.log(searchData);
     }
 }

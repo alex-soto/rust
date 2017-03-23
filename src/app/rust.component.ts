@@ -5,7 +5,7 @@ import { RustSearchPipe } from './rust-search.pipe';
 
 @Component({
   moduleId: module.id,
-  selector: 'rust-app',
+  selector: 'my-app',
   providers:    [ SchoolDataService, RustSearchPipe ],
   templateUrl: 'rust.component.html'
 })

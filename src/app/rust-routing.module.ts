@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { RustComponent } from './rust.component';
 
 const rustRoutes: Routes = [
-    { path: 'projects/rust', component: RustComponent }
+    { path: 'rust', component: RustComponent }
   ];
   
 @NgModule({

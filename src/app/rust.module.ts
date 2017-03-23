@@ -12,17 +12,10 @@ import { SubjectDetailsComponent  } from './subject-details.component';
 import { CourseDetailsComponent } from './course-details.component';
 import { SectionDetailsComponent } from './section-details.component';
 
-// @NgModule({
-//   imports:      [ BrowserModule, HttpModule, ReactiveFormsModule, Ng2AutoCompleteModule ],
-//   declarations: [ RustComponent, CourseDetailsComponent, RustSearchComponent, RustSearchPipe, 
-//                   SchoolDetailsComponent, SectionDetailsComponent, SubjectDetailsComponent],
-//   bootstrap:    [ RustComponent ]
-// })
-
 @NgModule({
   imports:      [ BrowserModule, HttpModule, ReactiveFormsModule, RustRoutingModule ],
   declarations: [ RustComponent, CourseDetailsComponent, RustSearchComponent, RustSearchPipe, 
                   SchoolDetailsComponent, SectionDetailsComponent, SubjectDetailsComponent],
-  exports:    [ RustComponent ]
+  bootstrap:    [ RustComponent ]
 })
 export class RustModule {}

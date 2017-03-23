@@ -1,14 +1,9 @@
 'use strict';
 const config = require('../config');
-// const Mongoose = require('mongoose').connect(config.dbURI);
 let mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 const options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } }};
 const Mongoose = mongoose.connect(config.dbURI, options);
-
-// Mongoose.connection.on('connected', () => {  
-//   console.log('Mongoose default connection open.');
-// });
 
 Mongoose.connection.on('disconnected', () => {  
   console.log('Mongoose connection closed.');
@@ -25,25 +20,11 @@ process.on('SIGINT', () => {
   }); 
 }); 
 
-const sectionSchema = new Mongoose.Schema({
-  number: {
-    type: String,
-    unique: true,
-    sparse: true
-  },
-  index: {
-    type: String,
-    unique: true,
-    sparse: true
-  },
-  instructors: [],
-  meetingTimes: []
-});
-
 const courseSchema = new Mongoose.Schema({
+  school: { type: String, ref: 'School' },
+  subject: { type: String, ref: 'Subject' },
   courseNumber: {
     type: String,
-    unique: true,
     sparse: true
   },
   title: {
@@ -74,14 +55,30 @@ const courseSchema = new Mongoose.Schema({
   semesters: [{
     name: {
       type: String,
-      unique: true,
       sparse: true
     },
-    sections: [sectionSchema]
+    sections: [{
+      number: {
+        type: String,
+        unique: true,
+        sparse: true
+      },
+      index: {
+        type: String,
+        unique: true,
+        sparse: true
+      },
+      instructors: [{ 
+        type: String, 
+        trim: true
+      }],
+      meetingTimes: []
+    }]
   }]
 });
 
 const subjectSchema = new Mongoose.Schema({
+  school: { type: String, ref: 'School' },
   code: {
     type: String,
     unique: true,
@@ -91,7 +88,7 @@ const subjectSchema = new Mongoose.Schema({
     type: String,
     trim: true
   },
-  courses: [courseSchema]
+  courses: [{ type: String, ref: 'Course' }]
 });
 
 const schoolSchema = new Mongoose.Schema({
@@ -99,12 +96,20 @@ const schoolSchema = new Mongoose.Schema({
   level: String,
   campus: String,
   description: String,
-  subjects: [subjectSchema]
+  subjects: [{ type: String, ref: 'Subject' }]
 });
 
-let schoolModel = Mongoose.model('School', schoolSchema);
+schoolSchema.index({'$**':'text'});
+subjectSchema.index({'$**':'text'});
+courseSchema.index({'$**':'text'});
+
+let schoolModel = Mongoose.model('School', schoolSchema),
+    subjectModel = Mongoose.model('Subject', subjectSchema),
+    courseModel = Mongoose.model('Course', courseSchema);
 
 module.exports = {
     Mongoose,
-    schoolModel
+    schoolModel,
+    subjectModel,
+    courseModel
 };

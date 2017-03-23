@@ -9,7 +9,7 @@ app.engine('html', require('ejs').renderFile);
 app.set('port', process.env.PORT || 3000);
 app.use(express.static(__dirname));
 
-app.use('/api', require('../api'));
+app.use('/api', require('./api'));
 app.get('/', (req, res) => {
     console.log(`req: ${req}`);
     res.render('index.html');

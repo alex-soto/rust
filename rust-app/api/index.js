@@ -1,6 +1,5 @@
 'use strict';
-const util = require('../scraper/utilities');
-const db = require('../scraper/db');
+const db = require('../db');
 const router = require('express').Router();
 
 let getSchools = () => {

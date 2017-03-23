@@ -72,13 +72,7 @@ let performSearch = (query) => {
             
         }
         if (searchModel){
-            // modelKeys = Object.keys(searchModel.schema.obj);
-            // for (let key of modelKeys){
-            //     dbQuery.push({[key]: searchValue});
-            // }
-            
-            // console.log(searchModel.modelName);
-            let searchRegex = new RegExp(`/.*${searchValue}.*/`);
+            // let searchRegex = new RegExp(`/.*${searchValue}.*/`);
             searchModel.find({
                 $text: { $search: `.*${searchValue}.*` }
                 // $text: { $regex: searchRegex }
@@ -98,7 +92,7 @@ let performSearch = (query) => {
 };
 
 router.get('/schools', (req, res) => {
-    console.log(`'/schools' api called`);
+    // console.log(`'/schools' api called`);
     
     getSchools().then(data => {
         res.send(data);
@@ -126,101 +120,8 @@ router.get('/search', (req, res) => {
     console.log(`'/search' api called`);
     console.log(`req.query: ${JSON.stringify(req.query)}`);
     performSearch(req.query).then(data => {
-        console.log(data);
         res.send(data);
-    })
-    // res.send(null);
+    });
 });
 
 module.exports = router;
-
-/*
-let getSubjectsBySchool = schoolId => {
-    return new Promise((resolve, reject) => {
-        db.schoolModel.findOne({ '_id' : schoolId }, (err, doc) => {
-            
-            if (err) {
-                console.log(`getSubjectsBySchool err: err`)
-                reject(err);
-            }
-            let subjects = doc.subjects.map((subj) => {
-                return {
-                    "_id": subj._id,
-                    "code": subj.code,
-                    "description": subj.description
-                };
-            });
-            // Promise.resolve(subjects);
-            resolve(subjects);
-        });
-    });
-};
-
-let getSubjects = schoolCode => {
-    return new Promise((resolve, reject) => {
-        db.schoolModel.aggregate([
-            {
-                $match: { code: schoolCode }
-            },
-            {
-                $unwind: "$subjects" 
-            },
-            {
-                $project: {
-                    _id: "$subjects._id", 
-                    code: "$subjects.code", 
-                    description: "$subjects.description",
-                    numCourses: { $size: "$subjects.courses"}
-                }
-            }
-        ], (err, doc) => {
-            if (err) {
-                reject(err);
-            }
-            if (doc) {
-                resolve(doc);
-            }
-        });
-    });
-};
-
-let getCourses = (schoolCode, subjectCode) => {
-    console.log(`getCourses called`);
-    return new Promise((resolve, reject) => {
-        db.schoolModel.aggregate([
-            {
-                $match: { code: schoolCode }
-            },
-            {
-                $unwind: "$subjects" 
-            },
-            {
-                $match: { "subjects.code" : subjectCode }
-            },
-            {
-                $unwind: "$subjects.courses"
-            },
-            {
-                $project: {
-                    _id: "$subjects.courses._id",
-                    code: "$subjects.courses.courseNumber",
-                    fullTitle: "$subjects.courses.fullTitle",
-                    title: "$subjects.courses.title",
-                    credits: "$subjects.courses.credits",
-                    prereqs: "$subjects.courses.prereqs",
-                    coreCodes: "$subjects.courses.coreCodes",
-                    synopsis: "$subjects.courses.synopsis",
-                    semesters: "$subjects.courses.semesters"
-                }
-            }
-        ], (err, doc) => {
-            if (err) {
-                reject(err);
-            }
-            if (doc) {
-                resolve(doc);
-            }
-        });
-    });
-};
-*/

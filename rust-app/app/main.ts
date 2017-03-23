@@ -1,6 +1,6 @@
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { RustModule } from './rust.module';
-// import {enableProdMode} from '@angular/core';
+import {enableProdMode} from '@angular/core';
 
-// enableProdMode();
+enableProdMode();
 platformBrowserDynamic().bootstrapModule(RustModule);

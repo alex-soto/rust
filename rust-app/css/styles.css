@@ -1,0 +1,82 @@
+/* Background pattern from Subtle Patterns */
+/*h1 {
+light cornflower blue: #96CBF7
+air superiority blue: #7399B8
+anti-flash white: #E9F2EF
+manatee: #98A5AA
+nickel: #6A7372
+} */
+
+body {
+  background-color: #F4F4F9;
+  /*font-family: 'Source Code Pro', monospace;*/
+  /*font-family: 'Inconsolata', monospace;*/
+  font-family: 'Open Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Lato', sans-serif;
+}
+
+#navbar-collapse>.navbar-nav>li {
+    float: none;
+}
+
+#school-nav {
+  float: left;
+  width: 20%;
+  min-width: 170px;
+}
+
+/*#school-details {*/
+/*  position: relative;*/
+/*  height: 100%;*/
+/*  overflow-y: scroll;*/
+/*}*/
+
+.school-list {
+  background-color: #ECEFF1;
+}
+
+.details-title {
+  color: #263238;
+  font-weight: bold;
+}
+
+.details-title h6 {
+  font-size: 13px;
+}
+
+.subject-list {
+  background-color: #CFD8DC;
+}
+
+.course-list {
+  background-color: #B0BEC5;
+}
+
+.course-info {
+  display: inline-block;
+}
+
+.course-info p {
+  float: left;
+  margin-right: 10px;
+}
+
+.table-semester {
+  background-color: #ECEFF1;
+}
+
+.table-semester, .table-semester th {
+  text-align: center;
+}
+
+section-details {
+  display: block;
+}
+
+.search-criteria .label {
+  margin-right: 5px;
+  cursor: pointer;
+}

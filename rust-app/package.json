@@ -6,7 +6,7 @@
   },
   "description": "QuickStart package.json from the documentation, supplemented with testing support",
   "scripts": {
-    "start": "node server"
+    "start": "tsc && concurrently \"tsc -w\" \"node server\" ",
   },
   "keywords": [],
   "author": "",

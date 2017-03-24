@@ -1,17 +1,17 @@
 {
-  "name": "angular-quickstart",
+  "name": "as-rust",
   "version": "1.0.0",
   "engines": {
     "node": "4.6.1"
   },
-  "description": "QuickStart package.json from the documentation, supplemented with testing support",
+  "description": "Course search tool for Rutgers University",
   "scripts": {
     "start": "tsc && concurrently \"tsc -w\" \"node server\" ",
     "tsc": "tsc",
     "tsc:w": "tsc -w"
   },
   "keywords": [],
-  "author": "",
+  "author": "Alex Soto",
   "license": "MIT",
   "dependencies": {
     "@angular/common": "~2.4.0",

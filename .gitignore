@@ -1,4 +1,4 @@
-**/config
+**/config/development.json
 
 node_modules/
 .npm

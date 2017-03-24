@@ -17,7 +17,7 @@
     <!--    <h3>Searches</h3>-->
     <!--</div>-->
     <div class="col-sm-10 col-sm-offset-1 col-xs-12">
-        <h3 (click)="OnClick()">School Data</h3>
+        <h3>School Data</h3>
         <div id="school-details" class="list-group" data-spy="scroll" data-target="#school-nav" *ngIf="schoolData !== undefined || schoolData !== false">
             <div class="list-group-item school-list" *ngFor="let school of schoolData | async | rustSearch:'schools'" 
                 (click)="selectSchool(school)"> 

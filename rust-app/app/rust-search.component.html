@@ -23,7 +23,7 @@
 </div> <!-- /input-group -->
 
 <!--<div class="well">-->
-<div class="search-criteria" (click)="OnClick()">
+<div class="search-criteria">
     <div *ngFor="let criterion of searchParams" class="criterion" 
             (click)="deleteSearchCriterion(criterion.searchKey)">
         <ul class="list-group">

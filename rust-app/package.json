@@ -1,6 +1,9 @@
 {
   "name": "angular-quickstart",
   "version": "1.0.0",
+  "engines": {
+    "node": "4.6.1"
+  },
   "description": "QuickStart package.json from the documentation, supplemented with testing support",
   "scripts": {
     "start": "tsc && concurrently \"tsc -w\" \"node server\" ",

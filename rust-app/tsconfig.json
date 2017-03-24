@@ -8,15 +8,6 @@
     "experimentalDecorators": true,
     "lib": [ "es2015", "dom" ],
     "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "files": [
-      "main.ts",
-      "typings.d.ts"
-    ],
-    "filesGlob": [
-      "main.ts",
-      "typings.d.ts",
-      "app/**/*.ts"  
-    ]
+    "suppressImplicitAnyIndexErrors": true
   }
 }

@@ -18,6 +18,10 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Lato', sans-serif;
 }
 
+.navbar-default .navbar-brand {
+    color: #1c313a;
+}
+
 #navbar-collapse>.navbar-nav>li {
     float: none;
 }
@@ -34,8 +38,14 @@ h1, h2, h3, h4, h5, h6 {
 /*  overflow-y: scroll;*/
 /*}*/
 
+.list-group-item {
+  border: 1px solid #455a64;
+}
+
 .school-list {
-  background-color: #ECEFF1;
+  /*background-color: #ECEFF1;*/
+  background-color: #c1d5e0;
+  cursor: pointer;
 }
 
 .details-title {

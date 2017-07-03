@@ -1,4 +1,4 @@
-# Rutgers Unaffiliated Course Tool
+# Rutgers Unaffiliated Scheduling Tool
 ## Objective
 Rust serves to create a more intuitive, user-friendly way to search for classes offered at Rutgers University. Instead of searching courses based on a single subject code, this application allows a broad search of Rutgers schools, subjects, and courses. Rust search results also include multiple semesters, as some classes are only offered at a certain time of the year.
 ## Project structure

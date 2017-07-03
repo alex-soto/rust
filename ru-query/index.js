@@ -1,6 +1,4 @@
 'use strict';
-const fs = require('fs');
-const querystring = require('querystring');
 const request = require('request');
 
 const QUERY_TYPES = {
